@@ -8,13 +8,16 @@
     <body class="bg-dark">
         <form method="POST" class="form c-dark bg-white">
             <h1>canvaseek config</h1>
-            <label for="domain">Domain</label><br>
+            <label for="domain">Domain (with https?://)</label><br>
             <input name="domain" id="domain" value="{{domain}}" class="text-input" required><br><br>
             <label for="key">API key</label><br>
             <input name="key" id="key" value="{{key}}" class="text-input" type="password" required><br><br>
             <label for="max">Max file ID</label><br>
             <input name="max" id="max" value="{{max}}" class="text-input" required><br><br>
+            <label for="workers">Workers count (recommended: 20)</label><br>
+            <input name="workers" id="workers" value="{{workers}}" class="text-input" type="number" required><br><br>
             <input type="submit" class="submit bg-dark c-white">
+            <h4>Note: if this is not your first time running canvaseek, you might want to restart the server after the changes are applied.</h4>
         </form>
     </body>
 </html>

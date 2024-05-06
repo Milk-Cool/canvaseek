@@ -4,22 +4,12 @@ require("./init.js");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const cluster = require("cluster");
 
-const app = express();
-const port = 5960;
+process.on("uncaughtException", console.error);
+process.on("unhandledRejection", console.error);
 
 const j = p => path.join(__dirname, p);
-
-const replace = (text, replacers) => {
-    for(let key in replacers)
-        text = text.replaceAll(`{{${key}}}`, replacers[key]);
-    return text;
-}
-const replaceServeText = (res, path, replacers) => {
-    let text = fs.readFileSync(path, "utf-8");
-    text = replace(text, replacers);
-    res.send(text);
-}
 
 const getConfig = () => JSON.parse(fs.readFileSync(j("data/config.json")));
 const setConfig = config => fs.writeFileSync(j("data/config.json"), JSON.stringify(config));
@@ -30,39 +20,95 @@ const checkConfig = () => {
         "domain" in config
         && "key" in config
         && "max" in config
+        && "workers" in config
     ))
         return false;
     return true;
 }
 
-const getCount = () => fs.readdirSync(j("data/")).length - 1;
+const main = () => {
+    const app = express();
+    const port = 5960;
 
-app.use(express.urlencoded({ "extended": false }));
+    const replace = (text, replacers) => {
+        for(let key in replacers)
+            text = text.replaceAll(`{{${key}}}`, replacers[key]);
+        return text;
+    }
+    const replaceServeText = (res, path, replacers) => {
+        let text = fs.readFileSync(path, "utf-8");
+        text = replace(text, replacers);
+        res.send(text);
+    }
 
-app.get("/style.css", (req, res) => res.sendFile(j("public/style.css")));
+    let started = false;
+    const startWorkers = () => {
+        if(started) return;
+        started = true;
+        for(let i = 0; i < parseInt(getConfig().workers); i++) {
+            const worker = cluster.fork();
+            worker.on("online", () => {
+                console.log(`Worker #${worker.id} online!`);
+            });
+        }
+    }
 
-app.get("/config", (req, res) => {
+    const getCount = () => fs.readdirSync(j("data/")).length - 1;
+
+    app.use(express.urlencoded({ "extended": false }));
+
+    app.get("/style.css", (req, res) => res.sendFile(j("public/style.css")));
+
+    app.get("/config", (req, res) => {
+        const config = getConfig();
+        replaceServeText(res, j("public/config.html"), {
+            "domain": config.domain ?? "",
+            "key": config.key ?? "",
+            "max": config.max ?? "",
+            "workers": config.workers ?? ""
+        });
+    });
+    app.post("/config", (req, res) => {
+        setConfig({
+            "domain": req.body.domain,
+            "key": req.body.key,
+            "max": req.body.max,
+            "workers": req.body.workers
+        });
+        startWorkers();
+        res.redirect("/");
+    });
+
+    app.get("/", (req, res) => {
+        if(!checkConfig()) return res.redirect("/config");
+        replaceServeText(res, j("public/index.html"), {
+            "count": getCount()
+        })
+    });
+
+    if(checkConfig()) startWorkers();
+
+    app.listen(port, "localhost", () => console.log(`Listening on ${port}!`));
+};
+
+const checkOne = async () => {
     const config = getConfig();
-    replaceServeText(res, j("public/config.html"), {
-        "domain": config.domain ?? "",
-        "key": config.key ?? "",
-        "max": config.max ?? ""
+    const f = await fetch(new URL("/api/v1/files/" + Math.floor(Math.random() * parseInt(config.max)), config.domain), {
+        "headers": {
+            "Authorization": "Bearer " + config.key,
+            "Accept": "application/json"
+        }
     });
-});
-app.post("/config", (req, res) => {
-    setConfig({
-        "domain": req.body.domain,
-        "key": req.body.key,
-        "max": req.body.max
-    });
-    res.redirect("/");
-});
+    if(f.status != 200) return;
+    const json = await f.json();
+    fs.writeFileSync(j("data/" + json.uuid), JSON.stringify(json));
+};
 
-app.get("/", (req, res) => {
-    if(!checkConfig()) return res.redirect("/config");
-    replaceServeText(res, j("public/index.html"), {
-        "count": getCount()
-    })
-});
+const worker = async () => {
+    while(true) await checkOne();
+};
 
-app.listen(port, "localhost", () => console.log(`Listening on ${port}!`));
+if(cluster.isPrimary)
+    main();
+else
+    worker();
