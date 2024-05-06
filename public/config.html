@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>canvaseek config</title>
+        <meta charset="utf-8">
+        <link href="/style.css" rel="stylesheet">
+    </head>
+    <body class="bg-dark">
+        <form method="POST" class="form c-dark bg-white">
+            <h1>canvaseek config</h1>
+            <label for="domain">Domain</label><br>
+            <input name="domain" id="domain" value="{{domain}}" class="text-input" required><br><br>
+            <label for="key">API key</label><br>
+            <input name="key" id="key" value="{{key}}" class="text-input" type="password" required><br><br>
+            <label for="max">Max file ID</label><br>
+            <input name="max" id="max" value="{{max}}" class="text-input" required><br><br>
+            <input type="submit" class="submit bg-dark c-white">
+        </form>
+    </body>
+</html>

@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "description": "Searches for hidden Canvas LMS files, including students' submissions!",
   "main": "index.js",
+  "bin": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/Milk-Cool/canvaseek/issues"
   },
-  "homepage": "https://github.com/Milk-Cool/canvaseek#readme"
+  "homepage": "https://github.com/Milk-Cool/canvaseek#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }

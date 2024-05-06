@@ -1,0 +1,38 @@
+* {
+    font-family: sans-serif;
+}
+
+.bg-dark {
+    background: #750000;
+}
+.bg-white {
+    background: white;
+}
+
+.c-dark {
+    color: #750000;
+}
+.c-white {
+    color: white;
+}
+
+.form {
+    padding: 2em;
+    border-radius: 1em;
+    position: fixed;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+}
+
+.text-input {
+    border-radius: .5em;
+    border: .1em solid #750000;
+    padding: 1em;
+}
+
+.submit {
+    cursor: pointer;
+    border-radius: .5em;
+    padding: 1em;
+}
