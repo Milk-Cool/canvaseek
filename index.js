@@ -35,6 +35,8 @@ const checkConfig = () => {
     return true;
 }
 
+const getCount = () => fs.readdirSync(j("data/")).length - 1;
+
 app.use(express.urlencoded({ "extended": false }));
 
 app.get("/style.css", (req, res) => res.sendFile(j("public/style.css")));
@@ -54,6 +56,13 @@ app.post("/config", (req, res) => {
         "max": req.body.max
     });
     res.redirect("/");
+});
+
+app.get("/", (req, res) => {
+    if(!checkConfig()) return res.redirect("/config");
+    replaceServeText(res, j("public/index.html"), {
+        "count": getCount()
+    })
 });
 
 app.listen(port, "localhost", () => console.log(`Listening on ${port}!`));
