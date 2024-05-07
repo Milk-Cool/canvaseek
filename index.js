@@ -156,6 +156,7 @@ Please regenerate it, update it in the config and restart the server.</div>` : "
             "content_type": json["content-type"] ?? "",
             "url": json.url ?? "",
             "preview_url": json.thumbnail_url ?? "",
+            "size": json.size > 1024 * 1024 ? `${Math.floor(json.size / (1024 * 1024))} MB` : `${Math.floor(json.size / 1024)} KB`,
             "created_at": (new Date(json.created_at ?? 0)).toString(),
             "updated_at": (new Date(json.updated_at ?? 0)).toString(),
             "modified_at": (new Date(json.modified_at ?? 0)).toString()
