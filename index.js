@@ -40,6 +40,10 @@ const main = () => {
     const app = express();
     const port = 5960;
 
+    let tokenBroken = false;
+
+    const workers = [];
+
     const replace = (text, replacers) => {
         for(let key in replacers)
             text = text.replaceAll(`{{${key}}}`, replacers[key]);
@@ -51,6 +55,13 @@ const main = () => {
         res.send(text);
     }
 
+    const handleMsg = msg => {
+        if(msg != "stop") return;
+        tokenBroken = true;
+        for(const worker of workers)
+            worker.kill();
+    }
+
     let started = false;
     const startWorkers = () => {
         if(started) return;
@@ -60,6 +71,11 @@ const main = () => {
             worker.on("online", () => {
                 console.log(`Worker #${worker.id} online!`);
             });
+            worker.on("exit", () => {
+                console.log(`Worker #${worker.id} exited!`);
+            });
+            worker.on("message", handleMsg);
+            workers.push(worker);
         }
     }
 
@@ -80,6 +96,9 @@ const main = () => {
     }
 
     const getCount = () => fs.readdirSync(j("data/")).length - specialFiles.length; // Count of special files
+
+    const tokenBrokenMessage = () => tokenBroken ? `<div class="token-broken"><h1>Your token is broken!</h1>\
+Please regenerate it, update it in the config and restart the server.</div>` : "";
 
     app.use(express.urlencoded({ "extended": false }));
 
@@ -108,6 +127,7 @@ const main = () => {
     app.get("/", (req, res) => {
         if(!checkConfig()) return res.redirect("/config");
         replaceServeText(res, j("public/index.html"), {
+            "token_broken": tokenBrokenMessage(),
             "count": getCount()
         })
     });
@@ -155,6 +175,7 @@ const checkOne = async () => {
             "Accept": "application/json"
         }
     });
+    if(f.status == 401) return cluster.worker.send("stop");
     if(f.status != 200) return;
     const json = await f.json();
     fs.writeFileSync(j("data/" + json.uuid), JSON.stringify(json));

@@ -53,3 +53,10 @@
     max-height: 10em;
     border-radius: 1em;
 }
+
+.token-broken {
+    background: #ff9c9c;
+    border-radius: .5em;
+    border: .1em solid #750000;
+    padding: 1em;
+}
