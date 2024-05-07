@@ -24,7 +24,7 @@
     top: 50vh;
     left: 50vw;
     transform: translate(-50%, -50%);
-    max-width: 25em;
+    max-width: 50em;
     max-height: 80vh;
     overflow-y: scroll;
 }
@@ -47,4 +47,9 @@
     cursor: pointer;
     border-radius: .5em;
     padding: 1em;
+}
+
+.preview {
+    max-height: 10em;
+    border-radius: 1em;
 }

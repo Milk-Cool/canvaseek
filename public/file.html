@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>canvaseek file</title>
+        <meta charset="utf-8">
+        <link href="/style.css" rel="stylesheet">
+    </head>
+    <body class="bg-dark">
+        <div class="form c-dark bg-white">
+            <h1>canvaseek file</h1>
+            <h3><a href="/" class="c-dark">Back</a></h3>
+            <br>
+            {{preview}}
+            <table border="0" class="table">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{id}}</td>
+                    </tr>
+                    <tr>
+                        <td>UUID</td>
+                        <td>{{uuid}}</td>
+                    </tr>
+                    <tr>
+                        <td>Display name</td>
+                        <td>{{display_name}}</td>
+                    </tr>
+                    <tr>
+                        <td>Filename</td>
+                        <td>{{filename}}</td>
+                    </tr>
+                    <tr>
+                        <td>MIME type</td>
+                        <td>{{content_type}}</td>
+                    </tr>
+                    <tr>
+                        <td>Download URL</td>
+                        <td><a href="{{url}}">{{url}}</a></td>
+                    </tr>
+                    <tr>
+                        <td>Preview URL</td>
+                        <td><a href="{{preview_url}}">{{preview_url}}</a></td>
+                    </tr>
+                    <tr>
+                        <td>Created at</td>
+                        <td>{{created_at}}</td>
+                    </tr>
+                    <tr>
+                        <td>Updated at</td>
+                        <td>{{updated_at}}</td>
+                    </tr>
+                    <tr>
+                        <td>Modified at</td>
+                        <td>{{modified_at}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </body>
+</html>

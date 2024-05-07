@@ -110,6 +110,26 @@ const main = () => {
         });
     });
 
+    app.get("/file/*", (req, res) => {
+        const name = req.path.split("/").filter(x => x)?.[1];
+        if(!name || name.includes("..")) return res.status(400).end("You need to specify the filename!");
+        if(!fs.existsSync(j("data/" + name))) return res.status(404).end("No such file found!");
+        const json = JSON.parse(fs.readFileSync(j("data/" + name)));
+        replaceServeText(res, j("public/file.html"), {
+            "preview": json.thumbnail_url ? `<img src="${json.thumbnail_url}" class="preview"><br><br>` : "",
+            "id": json.id ?? "",
+            "uuid": json.uuid ?? "",
+            "display_name": json.display_name ?? "",
+            "filename": json.filename ?? "",
+            "content_type": json.content_type ?? "",
+            "url": json.url ?? "",
+            "preview_url": json.preview_url ?? "",
+            "created_at": (new Date(json.created_at ?? 0)).toString(),
+            "updated_at": (new Date(json.updated_at ?? 0)).toString(),
+            "modified_at": (new Date(json.modified_at ?? 0)).toString()
+        });
+    });
+
     if(checkConfig()) startWorkers();
 
     app.listen(port, "localhost", () => console.log(`Listening on ${port}!`));
