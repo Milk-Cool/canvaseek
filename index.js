@@ -121,7 +121,7 @@ const main = () => {
             "uuid": json.uuid ?? "",
             "display_name": json.display_name ?? "",
             "filename": json.filename ?? "",
-            "content_type": json.content_type ?? "",
+            "content_type": json["content-type"] ?? "",
             "url": json.url ?? "",
             "preview_url": json.preview_url ?? "",
             "created_at": (new Date(json.created_at ?? 0)).toString(),
