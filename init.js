@@ -7,3 +7,5 @@ if(!fs.existsSync(j("data/")))
     fs.mkdirSync(j("data/"));
 if(!fs.existsSync(j("data/config.json")))
     fs.writeFileSync(j("data/config.json"), "{}");
+if(!fs.existsSync(j("data/read.json")))
+    fs.writeFileSync(j("data/read.json"), "[]");

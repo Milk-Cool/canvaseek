@@ -11,8 +11,18 @@ process.on("unhandledRejection", console.error);
 
 const j = p => path.join(__dirname, p);
 
+const specialFiles = ["config.json", "read.json"]
+
 const getConfig = () => JSON.parse(fs.readFileSync(j("data/config.json")));
 const setConfig = config => fs.writeFileSync(j("data/config.json"), JSON.stringify(config));
+
+const getRead = () => JSON.parse(fs.readFileSync(j("data/read.json")));
+const addRead = uuid => {
+    const read = getRead();
+    if(!read.includes(uuid))
+        read.push(uuid);
+    fs.writeFileSync(j("data/read.json"), JSON.stringify(read));
+}
 
 const checkConfig = () => {
     const config = getConfig();
@@ -55,20 +65,21 @@ const main = () => {
 
     const searchFiles = query => {
         const output = [];
+        const read = getRead();
         for(let file of fs.readdirSync(j("data/"))) {
-            if(file == "config.json") continue;
+            if(specialFiles.includes(file)) continue;
             const json = JSON.parse(fs.readFileSync(j("data/" + file)));
             if(
                 json.uuid == query
                 || json.display_name.toLowerCase().includes(query.toLowerCase())
                 || json.filename.toLowerCase().includes(query.toLowerCase())
                 || json["content-type"] == query
-            ) output.push([file, json.id, json.display_name]);
+            ) output.push([file, json.id, json.display_name, read.includes(file)]);
         }
         return output;
     }
 
-    const getCount = () => fs.readdirSync(j("data/")).length - 1;
+    const getCount = () => fs.readdirSync(j("data/")).length - specialFiles.length; // Count of special files
 
     app.use(express.urlencoded({ "extended": false }));
 
@@ -103,7 +114,7 @@ const main = () => {
     app.post("/", (req, res) => {
         const files = searchFiles(req.body.query);
         files.sort((a, b) => parseInt(b[1]) - parseInt(a[1]));
-        const trsAndTds = files.map(x => `<tr><td><a href="/file/${x[0]}">${x[1]}</a></td><td>${x[2]}</td></tr>`).join("\n");
+        const trsAndTds = files.map(x => `<tr><td><a href="/file/${x[0]}">${x[1]}</a></td><td>${x[2]}</td><td>${x[3] ? "✓" : ""}</td></tr>`).join("\n");
         replaceServeText(res, j("public/results.html"), {
             "count": files.length,
             "results": trsAndTds
@@ -114,6 +125,7 @@ const main = () => {
         const name = req.path.split("/").filter(x => x)?.[1];
         if(!name || name.includes("..")) return res.status(400).end("You need to specify the filename!");
         if(!fs.existsSync(j("data/" + name))) return res.status(404).end("No such file found!");
+        addRead(name);
         const json = JSON.parse(fs.readFileSync(j("data/" + name)));
         replaceServeText(res, j("public/file.html"), {
             "preview": json.thumbnail_url ? `<img src="${json.thumbnail_url}" class="preview"><br><br>` : "",
