@@ -53,6 +53,21 @@ const main = () => {
         }
     }
 
+    const searchFiles = query => {
+        const output = [];
+        for(let file of fs.readdirSync(j("data/"))) {
+            if(file == "config.json") continue;
+            const json = JSON.parse(fs.readFileSync(j("data/" + file)));
+            if(
+                json.uuid == query
+                || json.display_name.toLowerCase().includes(query.toLowerCase())
+                || json.filename.toLowerCase().includes(query.toLowerCase())
+                || json["content-type"] == query
+            ) output.push([file, json.id, json.display_name]);
+        }
+        return output;
+    }
+
     const getCount = () => fs.readdirSync(j("data/")).length - 1;
 
     app.use(express.urlencoded({ "extended": false }));
@@ -84,6 +99,14 @@ const main = () => {
         replaceServeText(res, j("public/index.html"), {
             "count": getCount()
         })
+    });
+    app.post("/", (req, res) => {
+        const files = searchFiles(req.body.query);
+        const trsAndTds = files.map(x => `<tr><td><a href="/file/${x[0]}">${x[1]}</a></td><td>${x[2]}</td></tr>`).join("\n");
+        replaceServeText(res, j("public/results.html"), {
+            "count": files.length,
+            "results": trsAndTds
+        });
     });
 
     if(checkConfig()) startWorkers();

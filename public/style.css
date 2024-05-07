@@ -17,12 +17,22 @@
 }
 
 .form {
+    text-align: center;
     padding: 2em;
     border-radius: 1em;
     position: fixed;
     top: 50vh;
     left: 50vw;
     transform: translate(-50%, -50%);
+    max-width: 25em;
+}
+
+.table {
+    width: 20em;
+}
+
+.table * {
+    color: #750000;
 }
 
 .text-input {
