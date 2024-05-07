@@ -123,7 +123,7 @@ const main = () => {
             "filename": json.filename ?? "",
             "content_type": json["content-type"] ?? "",
             "url": json.url ?? "",
-            "preview_url": json.preview_url ?? "",
+            "preview_url": json.thumbnail_url ?? "",
             "created_at": (new Date(json.created_at ?? 0)).toString(),
             "updated_at": (new Date(json.updated_at ?? 0)).toString(),
             "modified_at": (new Date(json.modified_at ?? 0)).toString()
