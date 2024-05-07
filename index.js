@@ -102,6 +102,7 @@ const main = () => {
     });
     app.post("/", (req, res) => {
         const files = searchFiles(req.body.query);
+        files.sort((a, b) => parseInt(b[1]) - parseInt(a[1]));
         const trsAndTds = files.map(x => `<tr><td><a href="/file/${x[0]}">${x[1]}</a></td><td>${x[2]}</td></tr>`).join("\n");
         replaceServeText(res, j("public/results.html"), {
             "count": files.length,
