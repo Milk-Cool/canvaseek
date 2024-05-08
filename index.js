@@ -40,9 +40,10 @@ const main = () => {
     const app = express();
     const port = 5960;
 
+    let started = false;
     let tokenBroken = false;
 
-    const workers = [];
+    let workers = [];
 
     const replace = (text, replacers) => {
         for(let key in replacers)
@@ -55,14 +56,19 @@ const main = () => {
         res.send(text);
     }
 
+    const killWorkers = () => {
+        for(const worker of workers)
+            worker.kill();
+        workers = [];
+        started = false;
+    }
+
     const handleMsg = msg => {
         if(msg != "stop") return;
         tokenBroken = true;
-        for(const worker of workers)
-            worker.kill();
+        killWorkers();
     }
 
-    let started = false;
     const startWorkers = () => {
         if(started) return;
         started = true;
@@ -98,7 +104,7 @@ const main = () => {
     const getCount = () => fs.readdirSync(j("data/")).length - specialFiles.length; // Count of special files
 
     const tokenBrokenMessage = () => tokenBroken ? `<div class="token-broken"><h1>Your token is broken!</h1>\
-Please regenerate it, update it in the config and restart the server.</div>` : "";
+Please regenerate it and update it in the config.</div>` : "";
 
     app.use(express.urlencoded({ "extended": false }));
 
@@ -120,6 +126,7 @@ Please regenerate it, update it in the config and restart the server.</div>` : "
             "max": req.body.max,
             "workers": req.body.workers
         });
+        killWorkers();
         startWorkers();
         res.redirect("/");
     });
