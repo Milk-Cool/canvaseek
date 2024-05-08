@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>canvaseek regen</title>
+        <meta charset="utf-8">
+        <link href="/style.css" rel="stylesheet">
+    </head>
+    <body class="bg-dark">
+        <form method="POST" class="form c-dark bg-white">
+            <h1>canvaseek regen</h1>
+            <label for="id">Token ID</label><br>
+            <input name="id" id="id" value="{{id}}" class="text-input" required><br><br>
+            <label for="session">Session (<code>_normandy_session</code> cookie)</label><br>
+            <input name="session" id="session" value="{{session}}" class="text-input" type="password" required><br><br>
+            <label for="csrf">CSRF token (<code>_csrf_token</code> cookie)</label><br>
+            <input name="csrf" id="csrf" value="{{csrf}}" class="text-input" type="password" required><br><br>
+            <input type="submit" class="submit bg-dark c-white">
+        </form>
+    </body>
+</html>

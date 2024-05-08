@@ -43,3 +43,15 @@ npm i . -g
     * Creation date/time
     * Modification date/time
     * Update date/time
+
+# Token regeneration
+16. Go to your Canvas account settings and [open the Network tab in DevTools](https://developer.chrome.com/docs/devtools/network)
+17. Open a token's settings and click "Regenerate Token"
+18. In the Network tab, look at the last entry that is **a number** (e. g. `107`) and remember what the number is or write it down
+19. In DevTools, [open the Application tab](https://developer.chrome.com/docs/devtools/application)
+20. On the left side, open Cookies > `https://canvas.myschool.com` (your school's Canvas instance URL)
+21. Copy the values `_normandy_session` and `_csrf_token`
+> Please note that if you log out of Canvas, you might need to copy these values again
+22. From the main canvaseek page, open "Edit regeneration config"
+23. Paste the values into the according fields
+24. Save the changes. The server will now regenerate the access token and reload all of its workers when needed

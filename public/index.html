@@ -9,7 +9,10 @@
         <form method="POST" class="form c-dark bg-white">
             {{token_broken}}
             <h1>canvaseek search</h1>
-            <h3>{{count}} files found | <a href="/config" class="c-dark">Edit config</a></h3>
+            <h3>
+                {{count}} files found | <a href="/config" class="c-dark">Edit config</a><br>
+                <a href="/regen" class="c-dark">Edit regeneration config</a>
+            </h3>
             <label for="query">Query</label><br>
             <input name="query" id="query" class="text-input"><br><br>
             <input type="submit" class="submit bg-dark c-white">

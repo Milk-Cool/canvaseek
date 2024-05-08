@@ -11,7 +11,7 @@ process.on("unhandledRejection", console.error);
 
 const j = p => path.join(__dirname, p);
 
-const specialFiles = ["config.json", "read.json"]
+const specialFiles = ["config.json", "read.json", "regen.json"]
 
 const getConfig = () => JSON.parse(fs.readFileSync(j("data/config.json")));
 const setConfig = config => fs.writeFileSync(j("data/config.json"), JSON.stringify(config));
@@ -24,6 +24,9 @@ const addRead = uuid => {
     fs.writeFileSync(j("data/read.json"), JSON.stringify(read));
 }
 
+const getRegenConfig = () => JSON.parse(fs.readFileSync(j("data/regen.json")));
+const setRegenConfig = config => fs.writeFileSync(j("data/regen.json"), JSON.stringify(config));
+
 const checkConfig = () => {
     const config = getConfig();
     if(!(
@@ -31,6 +34,16 @@ const checkConfig = () => {
         && "key" in config
         && "max" in config
         && "workers" in config
+    ))
+        return false;
+    return true;
+}
+const checkRegenConfig = () => {
+    const config = getRegenConfig();
+    if(!(
+        "id" in config
+        && "session" in config
+        && "csrf" in config
     ))
         return false;
     return true;
@@ -63,10 +76,36 @@ const main = () => {
         started = false;
     }
 
-    const handleMsg = msg => {
+    const regen = async () => {
+        if(!checkRegenConfig()) return false;
+        const config = getConfig();
+        const regenConfig = getRegenConfig();
+        const f = await fetch(new URL("/profile/tokens/" + regenConfig.id, config.domain), {
+            "headers": {
+                "accept": "application/json",
+                "content-type": "application/x-www-form-urlencoded",
+                "x-csrf-token": decodeURIComponent(regenConfig.csrf),
+                "cookie": `_normandy_session=${regenConfig.session}; _csrf_token=${regenConfig.csrf}`
+            },
+            "body": "access_token%5Bregenerate%5D=1&_method=PUT",
+            "method": "POST"
+        });
+        let j;
+        try { j = await f.json(); } catch(_) { return false; }
+        console.log(j);
+        if(!("visible_token" in j)) return false;
+        config.key = j.visible_token;
+        setConfig(config);
+
+        tokenBroken = false;
+        return true;
+    }
+
+    const handleMsg = async msg => {
         if(msg != "stop") return;
         tokenBroken = true;
         killWorkers();
+        if(await regen()) startWorkers();
     }
 
     const startWorkers = () => {
@@ -103,7 +142,7 @@ const main = () => {
 
     const getCount = () => fs.readdirSync(j("data/")).length - specialFiles.length; // Count of special files
 
-    const tokenBrokenMessage = () => tokenBroken ? `<div class="token-broken"><h1>Your token is broken!</h1>\
+    const tokenBrokenMessage = () => (tokenBroken && !checkRegenConfig()) ? `<div class="token-broken"><h1>Your token is broken!</h1>\
 Please regenerate it and update it in the config.</div>` : "";
 
     app.use(express.urlencoded({ "extended": false }));
@@ -128,6 +167,23 @@ Please regenerate it and update it in the config.</div>` : "";
         });
         killWorkers();
         startWorkers();
+        res.redirect("/");
+    });
+
+    app.get("/regen", (req, res) => {
+        const config = getRegenConfig();
+        replaceServeText(res, j("public/regen.html"), {
+            "id": config.id ?? "",
+            "session": config.session ?? "",
+            "csrf": config.csrf ?? ""
+        });
+    });
+    app.post("/regen", (req, res) => {
+        setRegenConfig({
+            "id": req.body.id ?? "",
+            "session": req.body.session ?? "",
+            "csrf": req.body.csrf ?? ""
+        });
         res.redirect("/");
     });
 
